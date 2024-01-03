@@ -64,8 +64,41 @@ The image below demonstrates the difference between BERT and GPT in treating sen
    <img width="500" alt="image" src="https://github.com/AbedSoleymani/NLP/assets/72225265/a7748504-3b19-4e8d-865e-6df61e6bc74d">
    </p>
 
+Prior to GPT, most state-of-the-art NLP models were trained specifically on a particular task like sentiment classification, textual entailment etc. using supervised learning. However, supervised models have two major limitations:
+1. They need large amount of annotated data for learning a particular task which is often not easily available.
+2. They fail to generalize for tasks other than what they have been trained for.
+
+GPT proposed learning a generative language model using unlabeled data and then fine-tuning the model by providing examples of specific downstream tasks like classification, sentiment analysis, textual entailment/summarization, text translation, and question answering.
+
+Following are the implementation details of the **GPT-1**:
+- Model used 768-dimensional state for encoding tokens into word embeddings. Position embeddings were also learnt during training.
+- `12` layered model was used with `12` attention heads in each self-attention layer.
+- For position wise feed forward layer `3072`-dimensional state was used.
+- Adam optimiser was used with learning rate of `2.5e-4`.
+- Attention, residual and embedding dropouts were used for regularisation, with dropout rate of `0.1`. Modified version of $L2$ regularisation was also used for non-bias weights.
+- $GELU$ was used as activation function.
+- The model was trained for `100` epochs on mini-batches of size `64` and sequence length of `512`. The model had 117M parameters in total.
+
+**GPT-2** had 1.5 billion parameters. which was 10 times more than GPT-1 (117M parameters). Major differences from GPT-1 are:
+- GPT-2 had `48` layers and used `1600` dimensional vectors for word embedding.
+- Larger vocabulary of `50,257` tokens was used.
+- Larger batch size of `512` and larger context window of `1024` tokens were used.
+- Layer normalisation was moved to input of each sub-block and an additional layer normalisation was added after final self-attention block.
+- At initialisation, the weight of residual layers was scaled by $\frac{1}{\sqrt{N}}$, where N was the number of residual layers.
+
+The architecture of **GPT-3** is same as GPT-2. Few major differences from GPT-2 are:
+- GPT-3 has `96` layers with each layer having `96` attention heads.
+- Size of word embeddings was increased to `12888` for GPT-3 from `1600` for GPT-2.
+- Context window size was increased from `1024 `for GPT-2 to `2048` tokens for GPT-3.
+- Adam optimiser was used with `beta_1=0.9`, `beta_2=0.95`, and `epsilon= 10e-8`.
+- Alternating dense and locally banded sparse attention patterns were used.
+
 ### Transfer Learning and Fine-Tuning
-The goal of this stage is to use transfer learning to make GPT architecture perform well on specific tasks such as.
+Supervised fine-tuning took as few as 3 epochs for most of the downstream tasks. This showed that the model had already learnt a lot about the language during pre-training. Thus, minimal fine-tuning was enough. Most of the hyper parameters from unsupervised pre-training were used for fine-tuning.
+
+A significant achievement by GPT model was its decent zero-shot performance on various tasks.
+Zero shot learning or behaviour refers to the ability of a model to perform a task without having seen any example of that kind in past. No gradients update happen during zero shot learning and the model is supposed to understand the task without looking at any examples.
+The paper demonstrated that model had evolved in zero shot performance on different NLP tasks like question-answering, schema resolution, sentiment analysis etc. due to pre-training.
 
 The most impressive feature of GPT-3 is that it’s a meta-learner; it has learned to learn. You can ask it in natural language to perform a new task and it “understands” what it has to do, which is less or more similar to how a human would!
 
