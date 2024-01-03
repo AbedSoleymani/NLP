@@ -6,9 +6,14 @@
 3. **Bidirectionality:** Transformers, by design, are deeply bidirectional. The self-attention mechanism allows each position in the sequence to attend to all positions, both to the left and right. This bidirectional attention enables Transformers to capture contextual information from both sides of a token simultaneously. On the other hand, LSTMs are inherently unidirectional in their standard form. While there are bidirectional variants (BiLSTM), they process the sequence in both forward and backward directions separately. The hidden states from both directions are usually concatenated but not interlinked during the sequential processing.
 4. **Contextual Awareness:** Transformers naturally capture bidirectional context through self-attention. Each position has access to information from all positions, allowing for a richer understanding of context. This bidirectionality is crucial for tasks where understanding the relationship between words in both directions is essential. Hoever, in a unidirectional LSTM, the information from the future (right side) doesn't directly influence the processing of the past (left side) and vice versa. Bidirectional LSTMs partially address this by considering both past and future contexts separately, but they are far less effective than transformers.
 
+![image](https://github.com/AbedSoleymani/NLP/assets/72225265/05743ac3-189b-4ef1-bd90-af76e0f4f6ce)
+
+
 ## BERT (Bidirectional Encoder Representations from Transformers)
-### Training
 BERT is nothing more than a stack of transformer encoders!
+<img width="1332" alt="Screenshot 2024-01-02 at 7 54 22 PM" src="https://github.com/AbedSoleymani/NLP/assets/72225265/cfb149db-52f0-4844-9224-9329644dc104">
+
+### Training
 The training process of BERT is done in two stages:
 1. **Masked Language Model (MLM):** BERT training involves randomly masking some of the words in a sentence (more specifically, $15$% of the words in each sequence are replaced with a [MASK] token.) and training the model to predict these masked words based on the surrounding context. This task encourages the model to capture bidirectional dependencies. In technical terms, the prediction of the output words requires:
    1. Adding a classification layer on top of the encoder output.
@@ -46,3 +51,24 @@ In fine-tuning stage, as stated in the original paper, most model hyperparameter
 - Number of epochs: `2`, `3`, `4`
 
 It also observed that large data sets (e.g., $100k+$ labeled training examples) were far less sensitive to hyperparameter choice than small data sets. Fine-tuning is typically very fast, so it is reasonable to simply run an exhaustive search over the above parameters and choose the model that performs best on the development set.
+
+## GPT (Generative Pre-trained Transformer)
+GPT is nothing more than a stack of transformer decoders!
+![image](https://github.com/AbedSoleymani/NLP/assets/72225265/bf481961-c894-4192-8e51-d28ce62d7abc)
+
+### Training
+The goal is to train the GPT Architecture to understand what language is. This stage is more straight-forward than BERT. GPT is pre-trained using an unsupervised learning task on a massive corpus of text data.
+The model just has to learn to predict the next word in a sequence given the context of previous words. This task is known as causal language modeling.
+The image below demonstrates the difference between BERT and GPT in treating sentences during the training phase. BERT uses a bidirectional Transformer. OpenAI GPT uses a left-to-right Transformer.
+<p align="center">
+   <img width="500" alt="image" src="https://github.com/AbedSoleymani/NLP/assets/72225265/a7748504-3b19-4e8d-865e-6df61e6bc74d">
+   </p>
+
+### Transfer Learning and Fine-Tuning
+The goal of this stage is to use transfer learning to make GPT architecture perform well on specific tasks such as.
+
+The most impressive feature of GPT-3 is that it’s a meta-learner; it has learned to learn. You can ask it in natural language to perform a new task and it “understands” what it has to do, which is less or more similar to how a human would!
+
+
+
+
