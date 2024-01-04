@@ -52,6 +52,54 @@ In fine-tuning stage, as stated in the original paper, most model hyperparameter
 
 It also observed that large data sets (e.g., $100k+$ labeled training examples) were far less sensitive to hyperparameter choice than small data sets. Fine-tuning is typically very fast, so it is reasonable to simply run an exhaustive search over the above parameters and choose the model that performs best on the development set.
 
+## XLNet
+BERT has the ability to understand and learn from both sides of a word or sequence of words, capturing context from the left and right. This bidirectional approach enhances its understanding of language. BERT also uses a denoising autoencoder during pretraining. This method involves corrupting the input by masking some words and predicting them, allowing BERT to learn meaningful representations. These are the reasons why BERT achieves better performance compared to models based on autoregressive language modeling.
+
+On the flip side, while masking words in the input is a key aspect of BERT's pretraining, it doesn't explicitly consider the dependencies between the positions of the masked words. This neglect of inter-mask dependencies can be a limitation. Moreover, there's a noted "pretrain-finetune discrepancy," meaning that the conditions during pretraining (where masked tokens are predicted) may differ from conditions during fine-tuning on specific tasks. This misalignment could potentially affect performance for the downstream tasks.
+
+In light of these pros and cons, XLNet, a generalized autoregressive pretraining method was proposed that (1) enables learning bidirectional contexts by maximizing the expected likelihood over all permutations of the factorization order and (2) overcomes the limitations of BERT thanks to its autoregressive formulation, inspired by the ideas from Transformer-XL, the state-of-the-art autoregressive model, into pretraining.
+
+XLNet leverages the best of both autoregressive (AR) language modeling and autoencoding (AE), the two most well-known pretraining objectives, while avoiding their limitations. The method can be applied to a variety of NLP downstream language tasks including question answering, sentiment analysis, natural language inference, document ranking and so on.
+
+In AR models (e.g., GPT), unidirectional context either in the forward or backward direction in a text sequence is encoded. This could become problematic especially with downstream language understanding task where bidirectional context information is required.
+<p align="center">
+<img width="600" alt="image" src="https://github.com/AbedSoleymani/NLP/assets/72225265/8dc94507-de7b-4f22-ad41-5ecc4fd9f477">
+</p>
+
+In contrast, AE based model has the capability of modeling bidirectional contexts by reconstructing the original text from corrupted input ([MASK]). AE model is thus better than AR model when it comes to better capturing bidirectional context.
+Unfortunately, for high-order, long-range dependency characteristics in natural language, BERT oversimplifies the problem by assuming predicted tokens (masked in the input) are independent of each other as long as the unmasked tokens are given.
+To better understand the difference, let’s consider a concrete example `[New, York, is, a, city]`. Suppose that `[New, York]` is the prediction targets and the objective is to maximize $log\ p(New\ York\ |\ is\ a\ city)$. In this case, BERT reduces to the following objective:
+
+$$
+{\cal J}_{BERT} = log\ p(New\ |\ is\ a\ city) + log\ p(York\ |\ is\ a\ city)
+$$
+
+As a result, BERT cannot model the joint probability using the product rule due to its independence assumption for the masked tokens.
+
+The authors of XLNet propose to retain the benefits of AR language model while having it learn from bidirectional context as AE models (e.g., BERT) during the pretraining phase. The interdependency between tokens will be preserved, unlike in BERT by modisying the cost function in the following manner:
+
+$$
+{\cal J}_{XLNet} = log\ p(New\ |\ is\ a\ city) + log\ p(York\ |\ New,\ is\ a\ city)
+$$
+
+In fact, the objective of XLNet is more suffisticated than this which makes the model “Permutation Language Modeling.”
+<p align="center">
+<img width="600" alt="image" src="https://github.com/AbedSoleymani/NLP/assets/72225265/f90b58e2-a5ba-4098-82a6-16f35afbfd72">
+</p>
+
+The basic idea behind this modeling is "Permutations". In the illustration above from the paper, we see an example for predicting the `x3` token given the same input sequence `x1→x2→x3→x4` with 4 tokens. For a sentence with N tokens, there will be $N!$ permutations. In this case, there are a total of 24 permutations, and the illustration demonstrates 4. In each permutation/factorization order, the $(t-1)$ tokens that proceed the token of interest (at $t^{th}$ position) will be feed forward into the hidden layers to predict the $t^{th}$ token. In this example, we are predicting `x3`. The benefit of using permutation language modeling is to capture information from both sides by varying the factorization order. Note that the input sequence order is not randomly permuted since we need to preserve natural order during finetuning. Only the factorization order is permuted.
+
+Here, the goal is to maximize the expected log-likelihood of a word sequence considering all the possible permutations of the factorization order. The following permutation language modeling objective formalizes the idea, where the first $(t-1)$ tokens in the factorization order is used to predict the $t^{th}$ token.
+
+$$
+\max_\theta\ \mathbb{E}_{\text{z} \sim {\cal Z}_T} \left[ \sum _{t=1}^T log\ p _\theta (x _{z _t} | \text{x} _{\text{z} _ {< t}}) \right]
+$$
+
+where:
+- Factorization orders: $\text{z} \sim {\cal Z}_T$
+- Likelihood function $p_\theta$
+- $x_{z_t}$: the $t^{th}$ token in the factorization
+- $x _{z _{< t}}$: first $(t-1)$ tokens before $t^{th}$ token
 ## GPT (Generative Pre-trained Transformer)
 GPT is nothing more than a stack of transformer decoders!
 ![image](https://github.com/AbedSoleymani/NLP/assets/72225265/bf481961-c894-4192-8e51-d28ce62d7abc)
